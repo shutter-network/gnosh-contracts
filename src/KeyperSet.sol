@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import "openzeppelin/contracts/access/Ownable.sol";
 import "src/IKeyperSet.sol";
 
+error AlreadyFinalized();
+
 contract KeyperSet is IKeyperSet, Ownable {
     bool finalized;
     address[] members;
@@ -30,14 +32,18 @@ contract KeyperSet is IKeyperSet, Ownable {
     }
 
     function addMembers(address[] calldata newMembers) public onlyOwner {
-        require(!finalized, "cannot add members to finalized keyper set");
+        if (finalized) {
+            revert AlreadyFinalized();
+        }
         for (uint64 j = 0; j < newMembers.length; j++) {
             members.push(newMembers[j]);
         }
     }
 
     function setThreshold(uint64 _threshold) public onlyOwner {
-        require(!finalized, "cannot set threshold of finalized keyper set");
+        if (finalized) {
+            revert AlreadyFinalized();
+        }
         threshold = _threshold;
     }
 

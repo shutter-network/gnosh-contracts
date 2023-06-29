@@ -19,9 +19,9 @@ contract KeyperSetTest is Test {
 
     function testChangeAfterFinalized() public {
         keyperSet.setFinalized();
-        vm.expectRevert("cannot set threshold of finalized keyper set");
+        vm.expectRevert(AlreadyFinalized.selector);
         keyperSet.setThreshold(0);
-        vm.expectRevert("cannot add members to finalized keyper set");
+        vm.expectRevert(AlreadyFinalized.selector);
         address[] memory members = new address[](0);
         keyperSet.addMembers(members);
     }

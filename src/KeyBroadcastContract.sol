@@ -13,15 +13,18 @@ contract KeyBroadcastContract is IKeyBroadcastContract {
     }
 
     function broadcastEonKey(uint64 eon, bytes memory key) external {
-        require(key.length > 0, "key is empty");
-        require(keys[eon].length == 0, "key already broadcast for this eon");
-        require(
-            msg.sender ==
-                IKeyperSetManager(keyperSetManagerAddress).getKeyperSetAddress(
-                    eon
-                ),
-            "not allowed to broadcast eon key"
-        );
+        if (key.length == 0) {
+            revert InvalidKey();
+        }
+        if (keys[eon].length > 0) {
+            revert AlreadyHaveKey();
+        }
+        if (
+            msg.sender !=
+            IKeyperSetManager(keyperSetManagerAddress).getKeyperSetAddress(eon)
+        ) {
+            revert NotAllowed();
+        }
 
         keys[eon] = key;
         emit EonKeyBroadcast(eon, key);

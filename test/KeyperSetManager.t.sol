@@ -34,19 +34,19 @@ contract KeyperSetManagerTest is Test {
 
     function testAddKeyperSetRequiresFinalizedSet() public {
         KeyperSet ks = new KeyperSet();
-        vm.expectRevert("keyper set contract not finalized");
+        vm.expectRevert(KeyperSetNotFinalized.selector);
         keyperSetManager.addKeyperSet(0, address(ks));
     }
 
     function testAddKeyperSetRequiresIncreasingActivationBlock() public {
         keyperSetManager.addKeyperSet(1000, address(members0));
-        vm.expectRevert("keyper set already added for this activation slot");
+        vm.expectRevert(AlreadyHaveKeyperSet.selector);
         keyperSetManager.addKeyperSet(999, address(members1));
         keyperSetManager.addKeyperSet(1000, address(members1));
     }
 
     function testGetKeyperSetIndexBySlotEmpty() public {
-        vm.expectRevert("no active keyper set found for given slot");
+        vm.expectRevert(NoActiveKeyperSet.selector);
         keyperSetManager.getKeyperSetIndexBySlot(0);
     }
 
@@ -54,10 +54,10 @@ contract KeyperSetManagerTest is Test {
         keyperSetManager.addKeyperSet(1000, address(members0));
         keyperSetManager.addKeyperSet(1100, address(members1));
 
-        vm.expectRevert("no active keyper set found for given slot");
+        vm.expectRevert(NoActiveKeyperSet.selector);
         keyperSetManager.getKeyperSetIndexBySlot(0);
 
-        vm.expectRevert("no active keyper set found for given slot");
+        vm.expectRevert(NoActiveKeyperSet.selector);
         keyperSetManager.getKeyperSetIndexBySlot(999);
 
         assertEq(keyperSetManager.getKeyperSetIndexBySlot(1000), 0);

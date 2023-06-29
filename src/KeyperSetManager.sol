@@ -13,15 +13,15 @@ contract KeyperSetManager is IKeyperSetManager, Ownable {
         uint64 activationSlot,
         address keyperSetContract
     ) external onlyOwner {
-        require(
-            contracts.length == 0 ||
-                activationSlot >= activationSlots[activationSlots.length - 1],
-            "keyper set already added for this activation slot"
-        );
-        require(
-            IKeyperSet(keyperSetContract).isFinalized(),
-            "keyper set contract not finalized"
-        );
+        if (
+            contracts.length > 0 &&
+            activationSlot < activationSlots[activationSlots.length - 1]
+        ) {
+            revert AlreadyHaveKeyperSet();
+        }
+        if (!IKeyperSet(keyperSetContract).isFinalized()) {
+            revert KeyperSetNotFinalized();
+        }
         activationSlots.push(activationSlot);
         contracts.push(keyperSetContract);
         emit KeyperSetAdded(activationSlot, keyperSetContract);
@@ -39,7 +39,7 @@ contract KeyperSetManager is IKeyperSetManager, Ownable {
                 return uint64(i - 1);
             }
         }
-        revert("no active keyper set found for given slot");
+        revert NoActiveKeyperSet();
     }
 
     function getKeyperSetAddress(uint64 index) external view returns (address) {

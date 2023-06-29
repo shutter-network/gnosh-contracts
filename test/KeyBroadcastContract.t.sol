@@ -29,14 +29,14 @@ contract KeyBroadcastTest is Test {
     }
 
     function testBroadcastEonKeyEmpty() public {
-        vm.expectRevert("key is empty");
+        vm.expectRevert(InvalidKey.selector);
         bytes memory key = bytes("");
         vm.prank(address(keyperSet));
         keyBroadcastContract.broadcastEonKey(1, key);
     }
 
     function testBroadcastEonKeyNotAllowed() public {
-        vm.expectRevert("not allowed to broadcast eon key");
+        vm.expectRevert(NotAllowed.selector);
         bytes memory key = bytes("foo bar");
         vm.prank(address(keyperSet));
         keyBroadcastContract.broadcastEonKey(0, key);
@@ -47,7 +47,7 @@ contract KeyBroadcastTest is Test {
         vm.prank(address(keyperSet));
         keyBroadcastContract.broadcastEonKey(1, key);
 
-        vm.expectRevert("key already broadcast for this eon");
+        vm.expectRevert(AlreadyHaveKey.selector);
         vm.prank(address(keyperSet));
         keyBroadcastContract.broadcastEonKey(1, key);
     }
