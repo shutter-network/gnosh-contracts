@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../src/KeyperSetManager.sol";
 import "../src/KeyperSet.sol";
 
-contract KeyperSetTest is Test {
+contract KeyperSetManagerTest is Test {
     KeyperSetManager public keyperSetManager;
     KeyperSet public members0;
     KeyperSet public members1;
