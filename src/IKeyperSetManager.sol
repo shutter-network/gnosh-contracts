@@ -8,7 +8,8 @@ error NoActiveKeyperSet();
 interface IKeyperSetManager {
     function addKeyperSet(
         uint64 activationSlot,
-        address keyperSetContract
+        address keyperSetContract,
+        address keyBroadcaster
     ) external;
 
     function getNumKeyperSets() external view returns (uint64);
@@ -23,5 +24,11 @@ interface IKeyperSetManager {
         uint64 index
     ) external view returns (uint64);
 
-    event KeyperSetAdded(uint64 activationSlot, address keyperSetContract);
+    function getKeyBroadcaster(uint64 index) external view returns (address);
+
+    event KeyperSetAdded(
+        uint64 activationSlot,
+        address keyperSetContract,
+        address keyBroadcaster
+    );
 }

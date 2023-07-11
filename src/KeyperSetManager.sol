@@ -8,10 +8,12 @@ import "src/IKeyperSetManager.sol";
 contract KeyperSetManager is IKeyperSetManager, Ownable {
     uint64[] activationSlots;
     address[] contracts;
+    address[] broadcasters;
 
     function addKeyperSet(
         uint64 activationSlot,
-        address keyperSetContract
+        address keyperSetContract,
+        address keyBroadcaster
     ) external onlyOwner {
         if (
             contracts.length > 0 &&
@@ -24,7 +26,8 @@ contract KeyperSetManager is IKeyperSetManager, Ownable {
         }
         activationSlots.push(activationSlot);
         contracts.push(keyperSetContract);
-        emit KeyperSetAdded(activationSlot, keyperSetContract);
+        broadcasters.push(keyBroadcaster);
+        emit KeyperSetAdded(activationSlot, keyperSetContract, keyBroadcaster);
     }
 
     function getNumKeyperSets() external view returns (uint64) {
@@ -50,5 +53,9 @@ contract KeyperSetManager is IKeyperSetManager, Ownable {
         uint64 index
     ) external view returns (uint64) {
         return activationSlots[index];
+    }
+
+    function getKeyBroadcaster(uint64 index) external view returns (address) {
+        return broadcasters[index];
     }
 }

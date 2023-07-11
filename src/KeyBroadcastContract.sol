@@ -21,7 +21,7 @@ contract KeyBroadcastContract is IKeyBroadcastContract {
         }
         if (
             msg.sender !=
-            IKeyperSetManager(keyperSetManagerAddress).getKeyperSetAddress(eon)
+            IKeyperSetManager(keyperSetManagerAddress).getKeyBroadcaster(eon)
         ) {
             revert NotAllowed();
         }
