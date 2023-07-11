@@ -10,7 +10,8 @@ import "../src/KeyperSet.sol";
 contract KeyBroadcastTest is Test {
     KeyBroadcastContract public keyBroadcastContract;
     KeyperSetManager public keyperSetManager;
-    KeyperSet public keyperSet;
+    KeyperSet public keyperSet0;
+    KeyperSet public keyperSet1;
 
     event EonKeyBroadcast(uint64 eon, bytes key);
 
@@ -19,36 +20,36 @@ contract KeyBroadcastTest is Test {
         keyBroadcastContract = new KeyBroadcastContract(
             address(keyperSetManager)
         );
-        keyperSet = new KeyperSet();
-        keyperSet.setFinalized();
-        keyperSetManager.addKeyperSet(100, address(keyperSet));
+        keyperSet0 = new KeyperSet();
+        keyperSet0.setFinalized();
+        keyperSetManager.addKeyperSet(100, address(keyperSet0));
 
-        keyperSet = new KeyperSet();
-        keyperSet.setFinalized();
-        keyperSetManager.addKeyperSet(200, address(keyperSet));
+        keyperSet1 = new KeyperSet();
+        keyperSet1.setFinalized();
+        keyperSetManager.addKeyperSet(200, address(keyperSet1));
     }
 
     function testBroadcastEonKeyEmpty() public {
         vm.expectRevert(InvalidKey.selector);
         bytes memory key = bytes("");
-        vm.prank(address(keyperSet));
+        vm.prank(address(keyperSet1));
         keyBroadcastContract.broadcastEonKey(1, key);
     }
 
     function testBroadcastEonKeyNotAllowed() public {
         vm.expectRevert(NotAllowed.selector);
         bytes memory key = bytes("foo bar");
-        vm.prank(address(keyperSet));
+        vm.prank(address(keyperSet1));
         keyBroadcastContract.broadcastEonKey(0, key);
     }
 
     function testBroadcastEonKeyDuplicate() public {
         bytes memory key = bytes("foo bar");
-        vm.prank(address(keyperSet));
+        vm.prank(address(keyperSet1));
         keyBroadcastContract.broadcastEonKey(1, key);
 
         vm.expectRevert(AlreadyHaveKey.selector);
-        vm.prank(address(keyperSet));
+        vm.prank(address(keyperSet1));
         keyBroadcastContract.broadcastEonKey(1, key);
     }
 
@@ -56,13 +57,13 @@ contract KeyBroadcastTest is Test {
         vm.expectEmit(address(keyBroadcastContract));
         bytes memory key = bytes("foo bar");
         emit EonKeyBroadcast(1, key);
-        vm.prank(address(keyperSet));
+        vm.prank(address(keyperSet1));
         keyBroadcastContract.broadcastEonKey(1, key);
     }
 
     function testGetEonKey() public {
         assertEq(keyBroadcastContract.getEonKey(1), bytes(""));
-        vm.prank(address(keyperSet));
+        vm.prank(address(keyperSet1));
         keyBroadcastContract.broadcastEonKey(1, bytes("foo bar"));
         assertEq(keyBroadcastContract.getEonKey(1), bytes("foo bar"));
     }
