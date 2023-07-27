@@ -45,6 +45,14 @@ contract KeyperSetManagerTest is Test {
         keyperSetManager.addKeyperSet(1000, address(members1));
     }
 
+    event KeyperSetAdded(uint64 activationSlot, address keyperSetContract);
+
+    function testAddKeyperSetEmits() public {
+        vm.expectEmit(address(keyperSetManager));
+        emit KeyperSetAdded(1000, address(members0));
+        keyperSetManager.addKeyperSet(1000, address(members0));
+    }
+
     function testGetKeyperSetIndexBySlotEmpty() public {
         vm.expectRevert(NoActiveKeyperSet.selector);
         keyperSetManager.getKeyperSetIndexBySlot(0);
