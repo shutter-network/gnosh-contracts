@@ -4,6 +4,31 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../src/KeyperSet.sol";
 
+contract KeyperSetRevertAfterFinalizedTest is Test {
+    KeyperSet public keyperSet;
+
+    function setUp() public {
+        keyperSet = new KeyperSet();
+        keyperSet.setFinalized();
+    }
+
+    function testSetThreshold() public {
+        vm.expectRevert(AlreadyFinalized.selector);
+        keyperSet.setThreshold(0);
+    }
+
+    function testAddMembers() public {
+        vm.expectRevert(AlreadyFinalized.selector);
+        address[] memory members = new address[](0);
+        keyperSet.addMembers(members);
+    }
+
+    function testSetKeyBroadcaster() public {
+        vm.expectRevert(AlreadyFinalized.selector);
+        keyperSet.setKeyBroadcaster(address(5));
+    }
+}
+
 contract KeyperSetTest is Test {
     KeyperSet public keyperSet;
 
@@ -15,15 +40,6 @@ contract KeyperSetTest is Test {
         assertEq(keyperSet.isFinalized(), false);
         keyperSet.setFinalized();
         assertEq(keyperSet.isFinalized(), true);
-    }
-
-    function testChangeAfterFinalized() public {
-        keyperSet.setFinalized();
-        vm.expectRevert(AlreadyFinalized.selector);
-        keyperSet.setThreshold(0);
-        vm.expectRevert(AlreadyFinalized.selector);
-        address[] memory members = new address[](0);
-        keyperSet.addMembers(members);
     }
 
     function testAddMembers() public {
@@ -70,6 +86,12 @@ contract KeyperSetTest is Test {
         keyperSet.setThreshold(0);
     }
 
+    function testSetKeybroadcasterOnlyOwner() public {
+        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        keyperSet.setKeyBroadcaster(address(5));
+    }
+
     function testThreshold() public {
         assertEq(keyperSet.getThreshold(), 0);
         keyperSet.setThreshold(5);
@@ -80,5 +102,13 @@ contract KeyperSetTest is Test {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(address(1));
         keyperSet.setFinalized();
+    }
+
+    function testBroadcaster() public {
+        keyperSet.setKeyBroadcaster(address(5));
+        keyperSet.setFinalized();
+
+        assertEq(keyperSet.isAllowedToBroadcastEonKey(address(1)), false);
+        assertEq(keyperSet.isAllowedToBroadcastEonKey(address(5)), true);
     }
 }

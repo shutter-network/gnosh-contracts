@@ -11,4 +11,6 @@ interface IKeyperSet {
     function getMembers() external view returns (address[] memory);
 
     function getThreshold() external view returns (uint64);
+
+    function isAllowedToBroadcastEonKey(address a) external view returns (bool);
 }

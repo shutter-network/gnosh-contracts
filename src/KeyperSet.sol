@@ -10,6 +10,7 @@ contract KeyperSet is IKeyperSet, Ownable {
     bool finalized;
     address[] members;
     uint64 threshold;
+    address broadcaster;
 
     function isFinalized() external view returns (bool) {
         return finalized;
@@ -47,7 +48,20 @@ contract KeyperSet is IKeyperSet, Ownable {
         threshold = _threshold;
     }
 
+    function setKeyBroadcaster(address _broadcaster) public onlyOwner {
+        if (finalized) {
+            revert AlreadyFinalized();
+        }
+        broadcaster = _broadcaster;
+    }
+
     function setFinalized() public onlyOwner {
         finalized = true;
+    }
+
+    function isAllowedToBroadcastEonKey(
+        address a
+    ) external view returns (bool) {
+        return a == broadcaster;
     }
 }

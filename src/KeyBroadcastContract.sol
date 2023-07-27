@@ -3,13 +3,14 @@ pragma solidity ^0.8.20;
 
 import "src/IKeyBroadcastContract.sol";
 import "src/IKeyperSetManager.sol";
+import "src/IKeyperSet.sol";
 
 contract KeyBroadcastContract is IKeyBroadcastContract {
     mapping(uint64 => bytes) private keys;
-    address private keyperSetManagerAddress;
+    IKeyperSetManager private keyperSetManager;
 
-    constructor(address _keyperSetManagerAddress) {
-        keyperSetManagerAddress = _keyperSetManagerAddress;
+    constructor(address keyperSetManagerAddress) {
+        keyperSetManager = IKeyperSetManager(keyperSetManagerAddress);
     }
 
     function broadcastEonKey(uint64 eon, bytes memory key) external {
@@ -20,8 +21,8 @@ contract KeyBroadcastContract is IKeyBroadcastContract {
             revert AlreadyHaveKey();
         }
         if (
-            msg.sender !=
-            IKeyperSetManager(keyperSetManagerAddress).getKeyperSetAddress(eon)
+            !IKeyperSet(keyperSetManager.getKeyperSetAddress(eon))
+                .isAllowedToBroadcastEonKey(msg.sender)
         ) {
             revert NotAllowed();
         }
