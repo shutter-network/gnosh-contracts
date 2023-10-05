@@ -4,17 +4,18 @@ pragma solidity ^0.8.20;
 import "src/IValidatorRegistry.sol";
 
 contract ValidatorRegistry is IValidatorRegistry {
-    function register(
-        bytes memory registrationMessage,
-        bytes memory registrationSignature
-    ) external {
-        emit Registration(registrationMessage, registrationSignature);
+    Update[] updates;
+
+    function update(bytes memory message, bytes memory signature) external {
+        updates.push(Update({message: message, signature: signature}));
+        emit Updated(message, signature);
     }
 
-    function deregister(
-        bytes memory deregistrationMessage,
-        bytes memory deregistrationSignature
-    ) external {
-        emit Deregistration(deregistrationMessage, deregistrationSignature);
+    function getNumUpdates() external view returns (uint256) {
+        return updates.length;
+    }
+
+    function getUpdate(uint256 i) external view returns (Update memory) {
+        return updates[i];
     }
 }
