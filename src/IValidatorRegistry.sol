@@ -2,19 +2,16 @@
 pragma solidity ^0.8.20;
 
 interface IValidatorRegistry {
-    function register(
-        bytes memory registrationMessage,
-        bytes memory registrationSignature
-    ) external;
+    struct Update {
+        bytes message;
+        bytes signature;
+    }
 
-    function deregister(
-        bytes memory deregistrationMessage,
-        bytes memory deregistrationSignature
-    ) external;
+    function getNumUpdates() external view returns (uint256);
 
-    event Registration(bytes registrationMessage, bytes registrationSignature);
-    event Deregistration(
-        bytes deregistrationMessage,
-        bytes deregistrationSignature
-    );
+    function getUpdate(uint256 i) external view returns (Update memory);
+
+    function update(bytes memory message, bytes memory signature) external;
+
+    event Updated(bytes message, bytes signature);
 }
