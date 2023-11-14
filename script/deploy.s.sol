@@ -16,12 +16,14 @@ contract DeployAll is Script {
     ValidatorRegistry public validatorRegistry;
 
     function deployKeyperSet() public {
+        address broadcaster = vm.envAddress("BROADCASTER");
         keyperSet = new KeyperSet();
         address[] memory members = new address[](3);
         members[0] = address(1);
         members[1] = address(2);
         members[2] = address(3);
         keyperSet.addMembers(members);
+        keyperSet.setKeyBroadcaster(broadcaster);
         keyperSet.setFinalized();
     }
 
