@@ -33,3 +33,13 @@ repos:
             "javascript",
             "proto",
           ]
+
+  - repo: local
+    hooks:
+      - id: bindings
+        name: bindings
+        entry: ./gen_bindings.sh
+        language: script
+        types: [solidity]
+        files: gen_bindings.sh
+        pass_filenames: false
