@@ -12,5 +12,8 @@ mkdir -p "$OUTPUT_DIR"
 forge build
 
 for contract in "${CONTRACTS[@]}"; do
-    abigen --abi <(jq '.["abi"]' "out/${contract}.sol/${contract}.json") --pkg "${PACKAGE_NAME}" --out "$OUTPUT_DIR/${contract}.go"
+    pkg=$(echo "$contract" | tr '[:upper:]' '[:lower:]')
+    d="${OUTPUT_DIR}/${pkg}"
+    mkdir -p "${d}"
+    abigen --abi <(jq '.["abi"]' "out/${contract}.sol/${contract}.json") --pkg "${pkg}" --out "${d}/${pkg}.go"
 done
