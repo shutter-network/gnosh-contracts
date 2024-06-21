@@ -8,52 +8,50 @@ import "../src/KeyperSetManager.sol";
 import "../src/Sequencer.sol";
 import "../src/ValidatorRegistry.sol";
 
-contract DeployAll is Script {
-    KeyBroadcastContract public keyBroadcastContract;
-    KeyperSet public keyperSet;
-    KeyperSetManager public keyperSetManager;
-    Sequencer public sequencer;
-    ValidatorRegistry public validatorRegistry;
+contract Deploy is Script {
+    function deployKeyperSetManager() public returns (KeyperSetManager) {
+        KeyperSetManager ksm = new KeyperSetManager();
 
-    function deployKeyperSet() public {
-        address broadcaster = vm.envAddress("BROADCASTER");
-        keyperSet = new KeyperSet();
-        address[] memory members = new address[](3);
-        members[0] = address(1);
-        members[1] = address(2);
-        members[2] = address(3);
-        keyperSet.addMembers(members);
-        keyperSet.setKeyBroadcaster(broadcaster);
-        keyperSet.setFinalized();
+        // add bootstrap keyper set
+        KeyperSet fakeKeyperset = new KeyperSet();
+        fakeKeyperset.setFinalized();
+        ksm.addKeyperSet(0, address(fakeKeyperset));
+
+        console.log("KeyperSetManager:", address(ksm));
+        return ksm;
     }
 
-    function deployKeyperSetManager() public {
-        keyperSetManager = new KeyperSetManager();
-        keyperSetManager.addKeyperSet(0, address(keyperSet));
+    function deployKeyBroadcastContract(
+        KeyperSetManager ksm
+    ) public returns (KeyBroadcastContract) {
+        KeyBroadcastContract kbc = new KeyBroadcastContract(address(ksm));
+        console.log("KeyBroadcastContract:", address(kbc));
+        return kbc;
     }
 
-    function deployKeyBroadcastContract() public {
-        keyBroadcastContract = new KeyBroadcastContract(
-            address(keyperSetManager)
-        );
+    function deploySequencer() public returns (Sequencer) {
+        Sequencer s = new Sequencer();
+        console.log("Sequencer:", address(s));
+        return s;
     }
 
-    function deploySequencer() public {
-        sequencer = new Sequencer();
-    }
-
-    function deployValidatorRegistry() public {
-        validatorRegistry = new ValidatorRegistry();
+    function deployValidatorRegistry() public returns (ValidatorRegistry) {
+        ValidatorRegistry vr = new ValidatorRegistry();
+        console.log("ValidatorRegistry:", address(vr));
+        return vr;
     }
 
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
-        deployKeyperSet();
-        deployKeyperSetManager();
-        deployKeyBroadcastContract();
+        uint256 deployKey = vm.envUint("DEPLOY_KEY");
+        address deployerAddress = vm.addr(deployKey);
+        console.log("Deployer:", deployerAddress);
+        vm.startBroadcast(deployKey);
+
+        KeyperSetManager ksm = deployKeyperSetManager();
+        deployKeyBroadcastContract(ksm);
         deploySequencer();
         deployValidatorRegistry();
+
         vm.stopBroadcast();
     }
 }
