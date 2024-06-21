@@ -31,7 +31,7 @@ var (
 
 // SequencerMetaData contains all meta data concerning the Sequencer contract.
 var SequencerMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"function\",\"name\":\"submitDecryptionProgress\",\"inputs\":[{\"name\":\"message\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"submitEncryptedTransaction\",\"inputs\":[{\"name\":\"eon\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"identityPrefix\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"encryptedTransaction\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"gasLimit\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"payable\"},{\"type\":\"event\",\"name\":\"DecryptionProgressSubmitted\",\"inputs\":[{\"name\":\"message\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TransactionSubmitted\",\"inputs\":[{\"name\":\"eon\",\"type\":\"uint64\",\"indexed\":false,\"internalType\":\"uint64\"},{\"name\":\"identityPrefix\",\"type\":\"bytes32\",\"indexed\":false,\"internalType\":\"bytes32\"},{\"name\":\"sender\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"},{\"name\":\"encryptedTransaction\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"gasLimit\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"InsufficientFee\",\"inputs\":[]}]",
+	ABI: "[{\"type\":\"function\",\"name\":\"getTxCountForEon\",\"inputs\":[{\"name\":\"eon\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"submitDecryptionProgress\",\"inputs\":[{\"name\":\"message\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"submitEncryptedTransaction\",\"inputs\":[{\"name\":\"eon\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"identityPrefix\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"encryptedTransaction\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"gasLimit\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"outputs\":[],\"stateMutability\":\"payable\"},{\"type\":\"event\",\"name\":\"DecryptionProgressSubmitted\",\"inputs\":[{\"name\":\"message\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"TransactionSubmitted\",\"inputs\":[{\"name\":\"eon\",\"type\":\"uint64\",\"indexed\":true,\"internalType\":\"uint64\"},{\"name\":\"txIndex\",\"type\":\"uint64\",\"indexed\":true,\"internalType\":\"uint64\"},{\"name\":\"identityPrefix\",\"type\":\"bytes32\",\"indexed\":false,\"internalType\":\"bytes32\"},{\"name\":\"sender\",\"type\":\"address\",\"indexed\":false,\"internalType\":\"address\"},{\"name\":\"encryptedTransaction\",\"type\":\"bytes\",\"indexed\":false,\"internalType\":\"bytes\"},{\"name\":\"gasLimit\",\"type\":\"uint256\",\"indexed\":false,\"internalType\":\"uint256\"}],\"anonymous\":false},{\"type\":\"error\",\"name\":\"InsufficientFee\",\"inputs\":[]}]",
 }
 
 // SequencerABI is the input ABI used to generate the binding from.
@@ -178,6 +178,37 @@ func (_Sequencer *SequencerTransactorRaw) Transfer(opts *bind.TransactOpts) (*ty
 // Transact invokes the (paid) contract method with params as input values.
 func (_Sequencer *SequencerTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _Sequencer.Contract.contract.Transact(opts, method, params...)
+}
+
+// GetTxCountForEon is a free data retrieval call binding the contract method 0x7bbd164b.
+//
+// Solidity: function getTxCountForEon(uint64 eon) view returns(uint64)
+func (_Sequencer *SequencerCaller) GetTxCountForEon(opts *bind.CallOpts, eon uint64) (uint64, error) {
+	var out []interface{}
+	err := _Sequencer.contract.Call(opts, &out, "getTxCountForEon", eon)
+
+	if err != nil {
+		return *new(uint64), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint64)).(*uint64)
+
+	return out0, err
+
+}
+
+// GetTxCountForEon is a free data retrieval call binding the contract method 0x7bbd164b.
+//
+// Solidity: function getTxCountForEon(uint64 eon) view returns(uint64)
+func (_Sequencer *SequencerSession) GetTxCountForEon(eon uint64) (uint64, error) {
+	return _Sequencer.Contract.GetTxCountForEon(&_Sequencer.CallOpts, eon)
+}
+
+// GetTxCountForEon is a free data retrieval call binding the contract method 0x7bbd164b.
+//
+// Solidity: function getTxCountForEon(uint64 eon) view returns(uint64)
+func (_Sequencer *SequencerCallerSession) GetTxCountForEon(eon uint64) (uint64, error) {
+	return _Sequencer.Contract.GetTxCountForEon(&_Sequencer.CallOpts, eon)
 }
 
 // SubmitDecryptionProgress is a paid mutator transaction binding the contract method 0x2d32522e.
@@ -426,6 +457,7 @@ func (it *SequencerTransactionSubmittedIterator) Close() error {
 // SequencerTransactionSubmitted represents a TransactionSubmitted event raised by the Sequencer contract.
 type SequencerTransactionSubmitted struct {
 	Eon                  uint64
+	TxIndex              uint64
 	IdentityPrefix       [32]byte
 	Sender               common.Address
 	EncryptedTransaction []byte
@@ -433,24 +465,42 @@ type SequencerTransactionSubmitted struct {
 	Raw                  types.Log // Blockchain specific contextual infos
 }
 
-// FilterTransactionSubmitted is a free log retrieval operation binding the contract event 0x6515f8e10d22a184f86cfbaeb024db7afde82add43a1b1c065e8d202e43ef1a0.
+// FilterTransactionSubmitted is a free log retrieval operation binding the contract event 0xa7f1b5467be46c45249fb93063cceef96c63ddad03819246bc7770e32d4f5b7d.
 //
-// Solidity: event TransactionSubmitted(uint64 eon, bytes32 identityPrefix, address sender, bytes encryptedTransaction, uint256 gasLimit)
-func (_Sequencer *SequencerFilterer) FilterTransactionSubmitted(opts *bind.FilterOpts) (*SequencerTransactionSubmittedIterator, error) {
+// Solidity: event TransactionSubmitted(uint64 indexed eon, uint64 indexed txIndex, bytes32 identityPrefix, address sender, bytes encryptedTransaction, uint256 gasLimit)
+func (_Sequencer *SequencerFilterer) FilterTransactionSubmitted(opts *bind.FilterOpts, eon []uint64, txIndex []uint64) (*SequencerTransactionSubmittedIterator, error) {
 
-	logs, sub, err := _Sequencer.contract.FilterLogs(opts, "TransactionSubmitted")
+	var eonRule []interface{}
+	for _, eonItem := range eon {
+		eonRule = append(eonRule, eonItem)
+	}
+	var txIndexRule []interface{}
+	for _, txIndexItem := range txIndex {
+		txIndexRule = append(txIndexRule, txIndexItem)
+	}
+
+	logs, sub, err := _Sequencer.contract.FilterLogs(opts, "TransactionSubmitted", eonRule, txIndexRule)
 	if err != nil {
 		return nil, err
 	}
 	return &SequencerTransactionSubmittedIterator{contract: _Sequencer.contract, event: "TransactionSubmitted", logs: logs, sub: sub}, nil
 }
 
-// WatchTransactionSubmitted is a free log subscription operation binding the contract event 0x6515f8e10d22a184f86cfbaeb024db7afde82add43a1b1c065e8d202e43ef1a0.
+// WatchTransactionSubmitted is a free log subscription operation binding the contract event 0xa7f1b5467be46c45249fb93063cceef96c63ddad03819246bc7770e32d4f5b7d.
 //
-// Solidity: event TransactionSubmitted(uint64 eon, bytes32 identityPrefix, address sender, bytes encryptedTransaction, uint256 gasLimit)
-func (_Sequencer *SequencerFilterer) WatchTransactionSubmitted(opts *bind.WatchOpts, sink chan<- *SequencerTransactionSubmitted) (event.Subscription, error) {
+// Solidity: event TransactionSubmitted(uint64 indexed eon, uint64 indexed txIndex, bytes32 identityPrefix, address sender, bytes encryptedTransaction, uint256 gasLimit)
+func (_Sequencer *SequencerFilterer) WatchTransactionSubmitted(opts *bind.WatchOpts, sink chan<- *SequencerTransactionSubmitted, eon []uint64, txIndex []uint64) (event.Subscription, error) {
 
-	logs, sub, err := _Sequencer.contract.WatchLogs(opts, "TransactionSubmitted")
+	var eonRule []interface{}
+	for _, eonItem := range eon {
+		eonRule = append(eonRule, eonItem)
+	}
+	var txIndexRule []interface{}
+	for _, txIndexItem := range txIndex {
+		txIndexRule = append(txIndexRule, txIndexItem)
+	}
+
+	logs, sub, err := _Sequencer.contract.WatchLogs(opts, "TransactionSubmitted", eonRule, txIndexRule)
 	if err != nil {
 		return nil, err
 	}
@@ -482,9 +532,9 @@ func (_Sequencer *SequencerFilterer) WatchTransactionSubmitted(opts *bind.WatchO
 	}), nil
 }
 
-// ParseTransactionSubmitted is a log parse operation binding the contract event 0x6515f8e10d22a184f86cfbaeb024db7afde82add43a1b1c065e8d202e43ef1a0.
+// ParseTransactionSubmitted is a log parse operation binding the contract event 0xa7f1b5467be46c45249fb93063cceef96c63ddad03819246bc7770e32d4f5b7d.
 //
-// Solidity: event TransactionSubmitted(uint64 eon, bytes32 identityPrefix, address sender, bytes encryptedTransaction, uint256 gasLimit)
+// Solidity: event TransactionSubmitted(uint64 indexed eon, uint64 indexed txIndex, bytes32 identityPrefix, address sender, bytes encryptedTransaction, uint256 gasLimit)
 func (_Sequencer *SequencerFilterer) ParseTransactionSubmitted(log types.Log) (*SequencerTransactionSubmitted, error) {
 	event := new(SequencerTransactionSubmitted)
 	if err := _Sequencer.contract.UnpackLog(event, "TransactionSubmitted", log); err != nil {
