@@ -8,13 +8,6 @@ import "../src/Sequencer.sol";
 contract SequencerTest is Test {
     Sequencer public sequencer;
 
-    event TransactionSubmitted(
-        uint64 eon,
-        bytes32 identityPrefix,
-        address sender,
-        bytes encryptedTransaction,
-        uint256 gasLimit
-    );
     event DecryptionProgressSubmitted(bytes message);
 
     function setUp() public {
@@ -23,14 +16,16 @@ contract SequencerTest is Test {
 
     function testSubmitTransaction() public {
         uint64 eon = 5;
+        uint64 txIndex = 0;
         bytes32 identityPrefix = hex"001122";
         address sender = makeAddr("sender");
         bytes memory encryptedTransaction = "aabbcc";
         uint256 gasLimit = 8;
 
         vm.expectEmit(address(sequencer));
-        emit TransactionSubmitted(
+        emit ISequencer.TransactionSubmitted(
             eon,
+            txIndex,
             identityPrefix,
             sender,
             encryptedTransaction,
@@ -71,5 +66,33 @@ contract SequencerTest is Test {
         vm.expectEmit(address(sequencer));
         emit DecryptionProgressSubmitted(message);
         sequencer.submitDecryptionProgress(message);
+    }
+
+    function testTxCount() public {
+        uint64 eon = 5;
+        bytes32 identityPrefix = hex"001122";
+        address sender = makeAddr("sender");
+        bytes memory encryptedTransaction = "aabbcc";
+        uint256 gasLimit = 8;
+
+        assertEqUint(sequencer.getTxCountForEon(eon), 0);
+        vm.fee(20);
+        hoax(sender);
+        sequencer.submitEncryptedTransaction{value: 160}(
+            eon,
+            identityPrefix,
+            encryptedTransaction,
+            gasLimit
+        );
+        assertEqUint(sequencer.getTxCountForEon(eon), 1);
+        assertEqUint(sequencer.getTxCountForEon(eon + 1), 0);
+        sequencer.submitEncryptedTransaction{value: 160}(
+            eon + 1,
+            identityPrefix,
+            encryptedTransaction,
+            gasLimit
+        );
+        assertEqUint(sequencer.getTxCountForEon(eon), 1);
+        assertEqUint(sequencer.getTxCountForEon(eon + 1), 1);
     }
 }

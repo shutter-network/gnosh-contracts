@@ -14,7 +14,8 @@ interface ISequencer {
     function submitDecryptionProgress(bytes memory message) external;
 
     event TransactionSubmitted(
-        uint64 eon,
+        uint64 indexed eon,
+        uint64 indexed txIndex,
         bytes32 identityPrefix,
         address sender,
         bytes encryptedTransaction,
